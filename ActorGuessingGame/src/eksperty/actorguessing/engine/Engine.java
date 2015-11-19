@@ -11,6 +11,14 @@ import org.jpl7.Query;
 import org.jpl7.Term;
 import org.jpl7.Variable;
 
+import eksperty.actorguessing.engine.entities.Actor;
+import eksperty.actorguessing.engine.entities.Director;
+import eksperty.actorguessing.engine.entities.Feature;
+import eksperty.actorguessing.engine.entities.Movie;
+import eksperty.actorguessing.engine.entities.Role;
+import eksperty.actorguessing.engine.entities.Series;
+import eksperty.actorguessing.engine.entities.Sex;
+
 public class Engine {
 	
 	private String basefile;
@@ -214,32 +222,186 @@ public class Engine {
 		this.movies.add(movie);
 	}
 
-	public Set<Actor> getActors() {
-		return actors;
+//	public Set<Actor> getActors() {
+//		return actors;
+//	}
+//
+//	public Set<Director> getDirectors() {
+//		return directors;
+//	}
+//
+//	public Set<Movie> getMovies() {
+//		return movies;
+//	}
+//
+//	public Set<Role> getRoles() {
+//		return roles;
+//	}
+//
+//	public Set<Series> getSeries() {
+//		return series;
+//	}
+//
+//	public Set<Sex> getSexes() {
+//		return sexes;
+//	}
+//
+//	public Set<Feature> getFeatures() {
+//		return features;
+//	}
+	
+	public String getActorPrologName(String friendlyName){
+		String result = null;
+		for(Actor a : this.actors){
+			if(a.getFriendlyName().equals(friendlyName)){
+				result = a.getPrologName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Director> getDirectors() {
-		return directors;
+	
+	public String getActorFriendlyName(String prologName){
+		String result = null;
+		for(Actor a : this.actors){
+			if(a.getPrologName().equals(prologName)){
+				result = a.getFriendlyName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Movie> getMovies() {
-		return movies;
+	
+	public String getDirectorPrologName(String friendlyName){
+		String result = null;
+		for(Director d : this.directors){
+			if(d.getFriendlyName().equals(friendlyName)){
+				result = d.getPrologName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Role> getRoles() {
-		return roles;
+	
+	public String getDirectorFriendlyName(String prologName){
+		String result = null;
+		for(Director d : this.directors){
+			if(d.getPrologName().equals(prologName)){
+				result = d.getFriendlyName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Series> getSeries() {
-		return series;
+	
+	public String getFeaturePrologName(String friendlyName){
+		String result = null;
+		for(Feature f : this.features){
+			if(f.getFriendlyName().equals(friendlyName)){
+				result = f.getPrologName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Sex> getSexes() {
-		return sexes;
+	
+	public String getFeatureFriendlyName(String prologName){
+		String result = null;
+		for(Feature f : this.features){
+			if(f.getPrologName().equals(prologName)){
+				result = f.getFriendlyName();
+				break;
+			}
+		}
+		return result;
 	}
-
-	public Set<Feature> getFeatures() {
-		return features;
+	
+	public String getMoviePrologName(String friendlyName){
+		String result = null;
+		for(Movie m : this.movies){
+			if(m.getFriendlyName().equals(friendlyName)){
+				result = m.getPrologName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getMovieFriendlyName(String prologName){
+		String result = null;
+		for(Movie m : this.movies){
+			if(m.getPrologName().equals(prologName)){
+				result = m.getFriendlyName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getRolePrologName(String friendlyName){
+		String result = null;
+		for(Role r : this.roles){
+			if(r.getFriendlyName().equals(friendlyName)){
+				result = r.getPrologName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getRoleFriendlyName(String prologName){
+		String result = null;
+		for(Role r : this.roles){
+			if(r.getPrologName().equals(prologName)){
+				result = r.getFriendlyName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getSeriesPrologName(String friendlyName){
+		String result = null;
+		for(Series s : this.series){
+			if(s.getFriendlyName().equals(friendlyName)){
+				result = s.getPrologName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getSeriesFriendlyName(String prologName){
+		String result = null;
+		for(Series s : this.series){
+			if(s.getPrologName().equals(prologName)){
+				result = s.getFriendlyName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getSexPrologName(String friendlyName){
+		String result = null;
+		for(Sex s : this.sexes){
+			if(s.getFriendlyName().equals(friendlyName)){
+				result = s.getPrologName();
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getSexFriendlyName(String prologName){
+		String result = null;
+		for(Sex s : this.sexes){
+			if(s.getPrologName().equals(prologName)){
+				result = s.getFriendlyName();
+				break;
+			}
+		}
+		return result;
 	}
 
 }
