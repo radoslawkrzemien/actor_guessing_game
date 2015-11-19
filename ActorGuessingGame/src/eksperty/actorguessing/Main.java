@@ -1,14 +1,16 @@
 package eksperty.actorguessing;
 
-import org.jpl7.Atom;
-import org.jpl7.Query;
-import org.jpl7.Term;
+import eksperty.actorguessing.engine.Engine;
 
 public class Main {
 	
 	public static void main(String args[]){
-		Query q = new Query("consult", new Term[] {new Atom("baza.pl")});
-		System.out.println("Consult results in " + (q.hasSolution() ? " Success" : "Failure"));
+		Engine engine = new Engine("baza.pl");
+		if(!engine.initialize()){
+			System.err.println("INITIALIZATION FAILED!");
+			System.exit(-1);
+		}
+		System.out.println("Initialization complete");
 	}
 
 }
