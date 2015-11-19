@@ -9,6 +9,7 @@ import java.util.Set;
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
+import org.jpl7.Variable;
 
 public class Engine {
 	
@@ -80,6 +81,14 @@ public class Engine {
 			System.exit(-1);
 		}
 		return true;
+	}
+	
+	public Actor askForActor(){
+		Actor result = null;
+		Variable actor = new Variable();
+//		Query q = new Query();
+		
+		return result;
 	}
 
 	private void parseFeatures(String line) {
