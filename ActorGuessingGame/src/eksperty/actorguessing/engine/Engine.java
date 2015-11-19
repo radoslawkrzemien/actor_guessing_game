@@ -56,121 +56,22 @@ public class Engine {
 		        String factName = line.substring(0,line.indexOf("("));
 		        switch(factName){
 		        	case "gral_w":
-		        		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		        		String movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		        		String actorFriendlyName = "";
-		        		for(String s : actorName.split("_")){
-		        			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		actorFriendlyName.trim();
-		        		String movieFriendlyName = "";
-		        		for(String s : movieName.split("_")){
-		        			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		movieFriendlyName.trim();
-		        		Actor actor = new Actor(actorName,actorFriendlyName);
-		        		Movie movie = new Movie(movieName,movieFriendlyName);
-		        		this.actors.add(actor);
-		        		this.movies.add(movie);
+		        		parseActorPlayedInMovie(line);
 		        		break;
 		        	case "gral_postac":
-		        		int firstCommaIndex = line.indexOf(",");
-		        		actorName = line.substring(line.indexOf("(") + 1, firstCommaIndex);
-		        		movieName = line.substring(firstCommaIndex + 1, line.indexOf(",",firstCommaIndex + 1));
-		        		String roleName = line.substring(line.indexOf(",",firstCommaIndex + 1) + 1, line.indexOf(")"));
-		        		actorFriendlyName = "";
-		        		for(String s : actorName.split("_")){
-		        			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		actorFriendlyName.trim();
-		        		movieFriendlyName = "";
-		        		for(String s : movieName.split("_")){
-		        			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		movieFriendlyName.trim();
-		        		String roleFriendlyName = "";
-		        		for(String s : roleName.split("_")){
-		        			roleFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		roleFriendlyName.trim();
-		        		actor = new Actor(actorName,actorFriendlyName);
-		        		movie = new Movie(movieName,movieFriendlyName);
-		        		Role role = new Role(roleName,roleFriendlyName);
-		        		this.actors.add(actor);
-		        		this.movies.add(movie);
-		        		this.roles.add(role);
+		        		parseActorPlayedRole(line);
 		        		break;
 		        	case "rezyserowal":
-		        		String directorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		        		movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		        		String directorFriendlyName = "";
-		        		for(String s : directorName.split("_")){
-		        			directorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		directorFriendlyName.trim();
-		        		movieFriendlyName = "";
-		        		for(String s : movieName.split("_")){
-		        			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		movieFriendlyName.trim();
-		        		Director director = new Director(directorName,directorFriendlyName);
-		        		movie = new Movie(movieName,movieFriendlyName);
-		        		this.directors.add(director);
-		        		this.movies.add(movie);
+						parseDirectors(line);
 		        		break;
 		        	case "film_z_serii":
-		        		movieName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		        		String seriesName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		        		movieFriendlyName = "";
-		        		for(String s : movieName.split("_")){
-		        			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		movieFriendlyName.trim();
-		        		String seriesFriendlyName = "";
-		        		for(String s : seriesName.split("_")){
-		        			seriesFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		seriesFriendlyName.trim();
-		        		movie = new Movie(movieName,movieFriendlyName);
-		        		Series series = new Series(seriesName,seriesFriendlyName);
-		        		this.series.add(series);
-		        		this.movies.add(movie);
+						parseSeries(line);
 		        		break;
 		        	case "plec":
-		        		actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		        		String sexName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		        		actorFriendlyName = "";
-		        		for(String s : actorName.split("_")){
-		        			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		actorFriendlyName.trim();
-		        		String sexFriendlyName = "";
-		        		for(String s : sexName.split("_")){
-		        			sexFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		sexFriendlyName.trim();
-		        		actor = new Actor(actorName,actorFriendlyName);
-		        		Sex sex = new Sex(sexName,sexFriendlyName);
-		        		this.actors.add(actor);
-		        		this.sexes.add(sex);
+						parseSex(line);
 		        		break;
 		        	case "cechy_szczegolne":
-		        		actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		        		String featureName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		        		actorFriendlyName = "";
-		        		for(String s : actorName.split("_")){
-		        			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		actorFriendlyName.trim();
-		        		String featureFriendlyName = "";
-		        		for(String s : featureName.split("_")){
-		        			featureFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		        		}
-		        		featureFriendlyName.trim();
-		        		actor = new Actor(actorName,actorFriendlyName);
-		        		Feature feature = new Feature(featureName,featureFriendlyName);
-		        		this.actors.add(actor);
-		        		this.features.add(feature);
+						parseFeatures(line);
 		        		break;
 		        }
 		    }
@@ -179,6 +80,129 @@ public class Engine {
 			System.exit(-1);
 		}
 		return true;
+	}
+
+	private void parseFeatures(String line) {
+		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
+		String featureName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
+		String actorFriendlyName = "";
+		for(String s : actorName.split("_")){
+			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		actorFriendlyName.trim();
+		String featureFriendlyName = "";
+		for(String s : featureName.split("_")){
+			featureFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		featureFriendlyName.trim();
+		Actor actor = new Actor(actorName,actorFriendlyName);
+		Feature feature = new Feature(featureName,featureFriendlyName);
+		this.actors.add(actor);
+		this.features.add(feature);
+	}
+
+	private void parseSex(String line) {
+		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
+		String sexName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
+		String actorFriendlyName = "";
+		for(String s : actorName.split("_")){
+			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		actorFriendlyName.trim();
+		String sexFriendlyName = "";
+		for(String s : sexName.split("_")){
+			sexFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		sexFriendlyName.trim();
+		Actor actor = new Actor(actorName,actorFriendlyName);
+		Sex sex = new Sex(sexName,sexFriendlyName);
+		this.actors.add(actor);
+		this.sexes.add(sex);
+	}
+
+	private void parseSeries(String line) {
+		String movieName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
+		String seriesName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
+		String movieFriendlyName = "";
+		for(String s : movieName.split("_")){
+			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		movieFriendlyName.trim();
+		String seriesFriendlyName = "";
+		for(String s : seriesName.split("_")){
+			seriesFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		seriesFriendlyName.trim();
+		Movie movie = new Movie(movieName,movieFriendlyName);
+		Series series = new Series(seriesName,seriesFriendlyName);
+		this.series.add(series);
+		this.movies.add(movie);
+	}
+
+	private void parseDirectors(String line) {
+		String directorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
+		String movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
+		String directorFriendlyName = "";
+		for(String s : directorName.split("_")){
+			directorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		directorFriendlyName.trim();
+		String movieFriendlyName = "";
+		for(String s : movieName.split("_")){
+			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		movieFriendlyName.trim();
+		Director director = new Director(directorName,directorFriendlyName);
+		Movie movie = new Movie(movieName,movieFriendlyName);
+		this.directors.add(director);
+		this.movies.add(movie);
+	}
+
+	private void parseActorPlayedRole(String line) {
+		int firstCommaIndex = line.indexOf(",");
+		String actorName = line.substring(line.indexOf("(") + 1, firstCommaIndex);
+		String movieName = line.substring(firstCommaIndex + 1, line.indexOf(",",firstCommaIndex + 1));
+		String roleName = line.substring(line.indexOf(",",firstCommaIndex + 1) + 1, line.indexOf(")"));
+		String actorFriendlyName = "";
+		for(String s : actorName.split("_")){
+			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		actorFriendlyName.trim();
+		String movieFriendlyName = "";
+		for(String s : movieName.split("_")){
+			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		movieFriendlyName.trim();
+		String roleFriendlyName = "";
+		for(String s : roleName.split("_")){
+			roleFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		roleFriendlyName.trim();
+		Actor actor = new Actor(actorName,actorFriendlyName);
+		Movie movie = new Movie(movieName,movieFriendlyName);
+		Role role = new Role(roleName,roleFriendlyName);
+		this.actors.add(actor);
+		this.movies.add(movie);
+		this.roles.add(role);
+	}
+
+	private void parseActorPlayedInMovie(String line) {
+		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
+		String movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
+		String actorFriendlyName = "";
+		for(String s : actorName.split("_")){
+			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		actorFriendlyName.trim();
+		String movieFriendlyName = "";
+		for(String s : movieName.split("_")){
+			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
+		}
+		movieFriendlyName.trim();
+		Actor actor = new Actor(actorName,actorFriendlyName);
+		Movie movie = new Movie(movieName,movieFriendlyName);
+		this.actors.add(actor);
+		this.movies.add(movie);
 	}
 
 	public Set<Actor> getActors() {
