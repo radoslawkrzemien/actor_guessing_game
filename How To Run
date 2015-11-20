@@ -1,0 +1,10 @@
+1. Add path do JPL library to VM Arguments
+  In Eclipse: Run > Run Configuration > [project name], under VM Arguments tab add '-Djava.library.path="[path to SWI-Prolog dir]\bin;."'
+  
+2. Add JPL path to PATH environment variable or create new one
+  In Eclipse: Run > Run Configuration > [project name], under Environment tab add:
+    VARIABLE: PATH
+    VALUE: [path to SWI-Prolog dir]\bin;${env_var:PATH}
+    
+3. Add JPL JAR to project
+  In Eclipse: Project > Properties > Java Build Path, under Libraries tab click Add External JARs and select JPL.jar from SWI-Prolog directory
