@@ -5,6 +5,7 @@ import javax.swing.UIManager;
 
 import eksperty.actorguessing.engine.Engine;
 import eksperty.actorguessing.gui.GUI;
+import eksperty.actorguessing.gui.Demo;;
 
 public class Main {
 	
@@ -20,7 +21,7 @@ public class Main {
             public void run() {
                 //Turn off metal's use of bold fonts
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        GUI.createAndShowGUI();
+        Demo.createAndShowGUI();
             }
         });
 	}
