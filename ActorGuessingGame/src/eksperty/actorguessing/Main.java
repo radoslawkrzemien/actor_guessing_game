@@ -16,21 +16,26 @@ import eksperty.actorguessing.gui.Demo;;
 public class Main {
 	
 	public static void main(String args[]){
-		Engine engine = new Engine("baza.pl");
+		final Engine engine = new Engine("baza.pl");
 		if(!engine.initialize()){
 			System.err.println("INITIALIZATION FAILED!");
 			System.exit(-1);
 		}
 		System.out.println("Initialization complete");
 		//final GUI gui = new GUI();
+
+//		testQueries(engine);
 		
-//		SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//                //Turn off metal's use of bold fonts
-//        UIManager.put("swing.boldMetal", Boolean.FALSE);
-//        Demo.createAndShowGUI();
-//            }
-//        });
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                //Turn off metal's use of bold fonts
+        UIManager.put("swing.boldMetal", Boolean.FALSE);
+        Demo.createAndShowGUI(engine);
+            }
+        });
+	}
+
+	private static void testQueries(Engine engine) {
 		int i = 1;
 		for(Actor actor : engine.callQuery(QuestionTypes.DIRECTOR_OF_MOVIE_PLAYED_IN, "Martin Scorsese")){
 			System.out.println("1");

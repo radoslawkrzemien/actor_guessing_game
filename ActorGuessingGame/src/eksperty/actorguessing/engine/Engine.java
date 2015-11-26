@@ -3,8 +3,10 @@ package eksperty.actorguessing.engine;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.jpl7.Atom;
@@ -14,6 +16,7 @@ import org.jpl7.Variable;
 
 import eksperty.actorguessing.engine.entities.Actor;
 import eksperty.actorguessing.engine.entities.Director;
+import eksperty.actorguessing.engine.entities.Entity;
 import eksperty.actorguessing.engine.entities.Feature;
 import eksperty.actorguessing.engine.entities.Movie;
 import eksperty.actorguessing.engine.entities.Role;
@@ -30,6 +33,7 @@ public class Engine {
 	private Set<Series> series = new HashSet<>();
 	private Set<Sex> sexes = new HashSet<>();
 	private Set<Feature> features = new HashSet<>();
+	private Set<Fact> knownFacts = new HashSet<>();
 	
 	public Engine (String basefile){
 		this.basefile = basefile;
@@ -155,6 +159,31 @@ public class Engine {
 		}
 		return result;
 	}
+	
+	public void addKnownFact(QuestionTypes type, String entityFriendlyName, boolean authenticity){
+		Fact f = new Fact(type,new Entity(getEntityPrologName(entityFriendlyName),entityFriendlyName),authenticity);
+		this.knownFacts.add(f);
+	}
+
+	private String getEntityPrologName(String argument) {
+		String result = getPersonPrologName(argument);
+		if(result == null){
+			result = getRolePrologName(argument);
+		}
+		if(result == null){
+			result = getFeaturePrologName(argument);
+		}
+		if(result == null){
+			result = getMoviePrologName(argument);
+		}
+		if(result == null){
+			result = getSeriesPrologName(argument);
+		}
+		if(result == null){
+			result = getSexPrologName(argument);
+		}
+		return result;
+	}
 
 	private boolean consult() {
 		Query q = new Query("consult", new Term[] {new Atom(basefile)});
@@ -204,14 +233,6 @@ public class Engine {
 			System.exit(-1);
 		}
 		return true;
-	}
-	
-	public Actor askForActor(){
-		Actor result = null;
-		Variable actor = new Variable();
-//		Query q = new Query();
-		
-		return result;
 	}
 
 	private void parseFeatures(String line) {
@@ -505,6 +526,80 @@ public class Engine {
 			result = getDirectorFriendlyName(argument);
 		}
 		return result;
+	}
+
+	
+	public Map<QuestionTypes, String> getNextQuestion() {
+		Map<QuestionTypes, String> result = new HashMap<>();
+		Set<Actor> resultSet = getResultSet();
+		if(resultSet.size() > 1){
+			Random rand = new Random();
+			int questionTypesCount = QuestionTypes.values().length;
+			QuestionTypes questionType = QuestionTypes.values()[rand.nextInt(questionTypesCount)];
+			String entity = null;
+			switch(questionType){
+				case MOVIE_PLAYED_IN:
+					int moviesSize = this.movies.size();
+					entity = ((Movie)this.movies.toArray()[rand.nextInt(moviesSize)]).getFriendlyName();
+					break;
+				case ROLE_PLAYED:
+				case ROLE_OFTEN_PLAYS:
+					int rolesSize = this.roles.size();
+					entity = ((Role)this.roles.toArray()[rand.nextInt(rolesSize)]).getFriendlyName();
+					break;
+				case DIRECTOR_OF_MOVIE_PLAYED_IN:
+					int directorsSize = this.directors.size();
+					entity = ((Director)this.directors.toArray()[rand.nextInt(directorsSize)]).getFriendlyName();
+					break;
+				case SERIES_MOVIE_PLAYED_IN_FROM:
+					int seriesSize = this.series.size();
+					entity = ((Series)this.series.toArray()[rand.nextInt(seriesSize)]).getFriendlyName();
+					break;
+				case SEX:
+					int sexesSize = this.sexes.size();
+					entity = ((Sex)this.sexes.toArray()[rand.nextInt(sexesSize)]).getFriendlyName();
+					break;
+				case FEATURES:
+					int featuresSize = this.features.size();
+					entity = ((Feature)this.features.toArray()[rand.nextInt(featuresSize)]).getFriendlyName();
+					break;
+				case PERSON_OFTEN_WORKS_WITH:
+					int personsSize = this.actors.size() + this.directors.size();
+					int index = rand.nextInt(personsSize);
+					if(index > this.actors.size()){
+						entity = ((Director)this.directors.toArray()[index - this.actors.size()]).getFriendlyName();
+					} else {
+						entity = ((Actor)this.actors.toArray()[index]).getFriendlyName();
+					}
+					break;
+				default:
+					System.err.println("WRONG QUESTION TYPE!");
+					System.exit(-1);
+					break;
+			}
+			result.put(questionType,entity);
+		}
+		return result;
+	}
+	
+	private Set<Actor> getResultSet(){
+		Set<Actor> resultSet = new HashSet<>();
+		if(this.knownFacts.size() == 0){
+			return this.actors;
+		}
+		for(Fact f : this.knownFacts){
+			resultSet.addAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName()));
+		}
+		return resultSet;
+	}
+
+	public String getResult() {
+		Actor result = null;
+		Set<Actor> resultSet = getResultSet();
+		if(resultSet.size() == 1){
+			result = (Actor) resultSet.toArray()[0];
+		}
+		return result == null ? null : result.getFriendlyName();
 	}
 
 }
