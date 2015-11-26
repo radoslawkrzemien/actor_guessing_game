@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.jpl7.Atom;
@@ -39,6 +40,120 @@ public class Engine {
 			return false;
 		}
 		return this.parseBasefile();
+	}
+
+	public Set<Actor> callQuery(QuestionTypes type, String argument){
+		Variable v = new Variable("A");
+		Query q = null;
+		Set<Actor> result = new HashSet<Actor>();
+		switch(type){
+			case MOVIE_PLAYED_IN:
+				String prologMovieName = getMoviePrologName(argument);
+				q = new Query("gral_w", new Term[] {v, new Atom(prologMovieName)});
+				Map<String,Term>[] solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			case ROLE_PLAYED:
+				String prologRoleName = getRolePrologName(argument);
+				Variable m = new Variable("M");
+				q = new Query("gral_postac", new Term[] {v, m, new Atom(prologRoleName)});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						if(s.equals("A")){
+							String actorPrologName = solution.get(s).toString();
+							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+							result.add(actor);
+						}
+					}
+				}
+				break;
+			case DIRECTOR_OF_MOVIE_PLAYED_IN:
+				String prologDirectorName = getDirectorPrologName(argument);
+				q = new Query("gral_w(A,F),rezyserowal(" + prologDirectorName + ",F).");
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						if(s.equals("A")){
+							String actorPrologName = solution.get(s).toString();
+							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+							result.add(actor);
+						}
+					}
+				}
+				break;
+			case SERIES_MOVIE_PLAYED_IN_FROM:
+				String prologSeriesName = getSeriesPrologName(argument);
+				q = new Query("gral_w_serii", new Term[] {v, new Atom(prologSeriesName)});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			case SEX:
+				String prologSexName = getSexPrologName(argument);
+				q = new Query("plec", new Term[] {v, new Atom(prologSexName)});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			case FEATURES:
+				String prologFeatureName = getFeaturePrologName(argument);
+				q = new Query("cechy_szczegolne", new Term[] {v, new Atom(prologFeatureName)});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			case PERSON_OFTEN_WORKS_WITH:
+				String prologPersonName = getPersonPrologName(argument);
+				q = new Query("czesto_pracuje_z", new Term[] {new Atom(prologPersonName), v});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			case ROLE_OFTEN_PLAYS:
+				prologRoleName = getRolePrologName(argument);
+				q = new Query("czesto_gra", new Term[] {v, new Atom(prologRoleName)});
+				solutions = q.allSolutions();
+				for(Map<String,Term> solution : solutions){
+					for(String s : solution.keySet()){
+						String actorPrologName = solution.get(s).toString();
+						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						result.add(actor);
+					}
+				}
+				break;
+			default:
+				System.err.println("WRONG QUESTION TYPE!");
+				System.exit(-1);
+				break;
+		}
+		return result;
 	}
 
 	private boolean consult() {
@@ -106,12 +221,12 @@ public class Engine {
 		for(String s : actorName.split("_")){
 			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		actorFriendlyName.trim();
+		actorFriendlyName = actorFriendlyName.trim();
 		String featureFriendlyName = "";
 		for(String s : featureName.split("_")){
 			featureFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		featureFriendlyName.trim();
+		featureFriendlyName = featureFriendlyName.trim();
 		Actor actor = new Actor(actorName,actorFriendlyName);
 		Feature feature = new Feature(featureName,featureFriendlyName);
 		this.actors.add(actor);
@@ -125,12 +240,12 @@ public class Engine {
 		for(String s : actorName.split("_")){
 			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		actorFriendlyName.trim();
+		actorFriendlyName = actorFriendlyName.trim();
 		String sexFriendlyName = "";
 		for(String s : sexName.split("_")){
 			sexFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		sexFriendlyName.trim();
+		sexFriendlyName = sexFriendlyName.trim();
 		Actor actor = new Actor(actorName,actorFriendlyName);
 		Sex sex = new Sex(sexName,sexFriendlyName);
 		this.actors.add(actor);
@@ -144,12 +259,12 @@ public class Engine {
 		for(String s : movieName.split("_")){
 			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		movieFriendlyName.trim();
+		movieFriendlyName = movieFriendlyName.trim();
 		String seriesFriendlyName = "";
 		for(String s : seriesName.split("_")){
 			seriesFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		seriesFriendlyName.trim();
+		seriesFriendlyName = seriesFriendlyName.trim();
 		Movie movie = new Movie(movieName,movieFriendlyName);
 		Series series = new Series(seriesName,seriesFriendlyName);
 		this.series.add(series);
@@ -163,12 +278,12 @@ public class Engine {
 		for(String s : directorName.split("_")){
 			directorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		directorFriendlyName.trim();
+		directorFriendlyName = directorFriendlyName.trim();
 		String movieFriendlyName = "";
 		for(String s : movieName.split("_")){
 			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		movieFriendlyName.trim();
+		movieFriendlyName = movieFriendlyName.trim();
 		Director director = new Director(directorName,directorFriendlyName);
 		Movie movie = new Movie(movieName,movieFriendlyName);
 		this.directors.add(director);
@@ -184,17 +299,17 @@ public class Engine {
 		for(String s : actorName.split("_")){
 			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		actorFriendlyName.trim();
+		actorFriendlyName = actorFriendlyName.trim();
 		String movieFriendlyName = "";
 		for(String s : movieName.split("_")){
 			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		movieFriendlyName.trim();
+		movieFriendlyName = movieFriendlyName.trim();
 		String roleFriendlyName = "";
 		for(String s : roleName.split("_")){
 			roleFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		roleFriendlyName.trim();
+		roleFriendlyName = roleFriendlyName.trim();
 		Actor actor = new Actor(actorName,actorFriendlyName);
 		Movie movie = new Movie(movieName,movieFriendlyName);
 		Role role = new Role(roleName,roleFriendlyName);
@@ -210,45 +325,17 @@ public class Engine {
 		for(String s : actorName.split("_")){
 			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		actorFriendlyName.trim();
+		actorFriendlyName = actorFriendlyName.trim();
 		String movieFriendlyName = "";
 		for(String s : movieName.split("_")){
 			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
 		}
-		movieFriendlyName.trim();
+		movieFriendlyName = movieFriendlyName.trim();
 		Actor actor = new Actor(actorName,actorFriendlyName);
 		Movie movie = new Movie(movieName,movieFriendlyName);
 		this.actors.add(actor);
 		this.movies.add(movie);
 	}
-
-//	public Set<Actor> getActors() {
-//		return actors;
-//	}
-//
-//	public Set<Director> getDirectors() {
-//		return directors;
-//	}
-//
-//	public Set<Movie> getMovies() {
-//		return movies;
-//	}
-//
-//	public Set<Role> getRoles() {
-//		return roles;
-//	}
-//
-//	public Set<Series> getSeries() {
-//		return series;
-//	}
-//
-//	public Set<Sex> getSexes() {
-//		return sexes;
-//	}
-//
-//	public Set<Feature> getFeatures() {
-//		return features;
-//	}
 	
 	public String getActorPrologName(String friendlyName){
 		String result = null;
@@ -400,6 +487,22 @@ public class Engine {
 				result = s.getFriendlyName();
 				break;
 			}
+		}
+		return result;
+	}
+
+	private String getPersonPrologName(String argument) {
+		String result = null;
+		if((result = getActorPrologName(argument)) == null){
+			result = getDirectorPrologName(argument);
+		}
+		return result;
+	}
+
+	private String getPersonFriendlyName(String argument) {
+		String result = null;
+		if((result = getActorFriendlyName(argument)) == null){
+			result = getDirectorFriendlyName(argument);
 		}
 		return result;
 	}

@@ -1,0 +1,14 @@
+package eksperty.actorguessing.engine;
+
+public enum QuestionTypes {
+	
+	MOVIE_PLAYED_IN,
+	ROLE_PLAYED,
+	DIRECTOR_OF_MOVIE_PLAYED_IN,
+	SERIES_MOVIE_PLAYED_IN_FROM,
+	SEX,
+	FEATURES,
+	PERSON_OFTEN_WORKS_WITH,
+	ROLE_OFTEN_PLAYS
+
+}
