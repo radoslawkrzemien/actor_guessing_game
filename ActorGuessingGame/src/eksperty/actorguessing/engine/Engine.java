@@ -46,7 +46,7 @@ public class Engine {
 		return this.parseBasefile();
 	}
 
-	public Set<Actor> callQuery(QuestionTypes type, String argument){
+	public Set<Actor> callQuery(QuestionTypes type, String argument, boolean authenticity){
 		Variable v = new Variable("A");
 		Query q = null;
 		Set<Actor> result = new HashSet<Actor>();
@@ -156,6 +156,12 @@ public class Engine {
 				System.err.println("WRONG QUESTION TYPE!");
 				System.exit(-1);
 				break;
+		}
+		if(!authenticity){
+			Set<Actor> allActors = new HashSet<>();
+			allActors.addAll(this.actors);
+			allActors.removeAll(result);
+			result = allActors;
 		}
 		return result;
 	}
@@ -588,7 +594,7 @@ public class Engine {
 			return this.actors;
 		}
 		for(Fact f : this.knownFacts){
-			resultSet.addAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName()));
+			resultSet.addAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName(),f.isAuthenticity()));
 		}
 		return resultSet;
 	}
