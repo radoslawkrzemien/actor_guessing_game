@@ -63,21 +63,21 @@ public class Engine {
 					}
 				}
 				break;
-			case ROLE_PLAYED:
-				String prologRoleName = getRolePrologName(argument);
-				Variable m = new Variable("M");
-				q = new Query("gral_postac", new Term[] {v, m, new Atom(prologRoleName)});
-				solutions = q.allSolutions();
-				for(Map<String,Term> solution : solutions){
-					for(String s : solution.keySet()){
-						if(s.equals("A")){
-							String actorPrologName = solution.get(s).toString();
-							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
-							result.add(actor);
-						}
-					}
-				}
-				break;
+//			case ROLE_PLAYED:
+//				String prologRoleName = getRolePrologName(argument);
+//				Variable m = new Variable("M");
+//				q = new Query("gral_postac", new Term[] {v, m, new Atom(prologRoleName)});
+//				solutions = q.allSolutions();
+//				for(Map<String,Term> solution : solutions){
+//					for(String s : solution.keySet()){
+//						if(s.equals("A")){
+//							String actorPrologName = solution.get(s).toString();
+//							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+//							result.add(actor);
+//						}
+//					}
+//				}
+//				break;
 			case DIRECTOR_OF_MOVIE_PLAYED_IN:
 				String prologDirectorName = getDirectorPrologName(argument);
 				q = new Query("gral_w(A,F),rezyserowal(" + prologDirectorName + ",F).");
@@ -141,7 +141,7 @@ public class Engine {
 				}
 				break;
 			case ROLE_OFTEN_PLAYS:
-				prologRoleName = getRolePrologName(argument);
+				String prologRoleName = getRolePrologName(argument);
 				q = new Query("czesto_gra", new Term[] {v, new Atom(prologRoleName)});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
@@ -548,7 +548,7 @@ public class Engine {
 					int moviesSize = this.movies.size();
 					entity = ((Movie)this.movies.toArray()[rand.nextInt(moviesSize)]).getFriendlyName();
 					break;
-				case ROLE_PLAYED:
+//				case ROLE_PLAYED:
 				case ROLE_OFTEN_PLAYS:
 					int rolesSize = this.roles.size();
 					entity = ((Role)this.roles.toArray()[rand.nextInt(rolesSize)]).getFriendlyName();
@@ -594,7 +594,10 @@ public class Engine {
 			return this.actors;
 		}
 		for(Fact f : this.knownFacts){
-			resultSet.addAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName(),f.isAuthenticity()));
+			if(resultSet.isEmpty())
+				resultSet.addAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName(),f.isAuthenticity()));
+			else
+				resultSet.retainAll(callQuery(f.getQuestionType(), f.getEntity().getFriendlyName(),f.isAuthenticity()));
 		}
 		return resultSet;
 	}

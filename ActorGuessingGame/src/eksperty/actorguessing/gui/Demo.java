@@ -28,7 +28,11 @@ public class Demo extends JPanel {
 			"Czy ma pieprzyka na policzku ?", "Czy Twój aktor do Robert de Niro ?" };
 	private Map<QuestionTypes,String> questionMappings = new HashMap<>();
 	private int i = 0;
-	private JLabel filter = new JLabel(exampleQuestions[i]);
+	private JLabel filter = new JLabel();
+	private JButton yesBtn = new JButton("Tak");
+	private JButton noBtn = new JButton("Nie");
+	private JButton dontKnowBtn = new JButton("Nie wiem");
+	private int state = 0;
 	
 	private QuestionTypes currentQuestion = null;
 	private String currentEntity = null;
@@ -44,7 +48,7 @@ public class Demo extends JPanel {
 
 	private void initializeQuestionMappings() {
 		this.questionMappings.put(QuestionTypes.MOVIE_PLAYED_IN, "Czy aktor gral w ");
-		this.questionMappings.put(QuestionTypes.ROLE_PLAYED, "Czy aktor wystepowal jako ");
+//		this.questionMappings.put(QuestionTypes.ROLE_PLAYED, "Czy aktor wystepowal jako ");
 		this.questionMappings.put(QuestionTypes.DIRECTOR_OF_MOVIE_PLAYED_IN, "Czy aktor gral w filmie rezyserowanym przez ");
 		this.questionMappings.put(QuestionTypes.SERIES_MOVIE_PLAYED_IN_FROM, "Czy aktor gral w filmie z serii ");
 		this.questionMappings.put(QuestionTypes.SEX, "Czy aktor ma plec ");
@@ -65,9 +69,9 @@ public class Demo extends JPanel {
 		panel.setLayout(new GridLayout(2, 1));
 		askPanel.setLayout(new GridLayout(1, 3));
 
-		JButton yesBtn = new JButton("Tak");
-		JButton noBtn = new JButton("Nie");
-		JButton dontKnowBtn = new JButton("Nie wiem");
+//		JButton yesBtn = new JButton("Tak");
+//		JButton noBtn = new JButton("Nie");
+//		JButton dontKnowBtn = new JButton("Nie wiem");
 		yesBtn.addActionListener(demoListener(this.engine));
 		noBtn.addActionListener(demoListener(this.engine));
 		dontKnowBtn.addActionListener(demoListener(this.engine));
@@ -101,6 +105,7 @@ public class Demo extends JPanel {
 	private void refreshQuestion() {
 		Map<QuestionTypes,String> nextQuestion = engine.getNextQuestion();
 		if(nextQuestion.isEmpty()){
+			this.state++;
 			String result = engine.getResult();
 			filter.setText("Czy twoj aktor to " + result);
 		} else {
@@ -126,17 +131,36 @@ public class Demo extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			String buttonText = ((JButton)e.getSource()).getText();
 			if(buttonText.equals("Tak")){
-				engine.addKnownFact(currentQuestion, currentEntity, true);
+				if(state == 0)
+					engine.addKnownFact(currentQuestion, currentEntity, true);
+				else
+					updateWindowSuccess();
 			} else if(buttonText.equals("Nie")){
-				engine.addKnownFact(currentQuestion, currentEntity, false);
+				if(state == 0)
+					engine.addKnownFact(currentQuestion, currentEntity, false);
+				else
+					updateWindowFailure();
 			}
-//			if (i < exampleQuestions.length-1) {
-//				filter.setText(exampleQuestions[++i]);
-//			}else{
-//				filter.setText("demo");
-//			}
-			refreshQuestion();
+			if(state == 0)
+				refreshQuestion();
 
 		}
+	}
+
+	public void updateWindowSuccess() {
+		filter.setText("Udalo sie odgadnac aktora! :)");
+		hideButtons();
+		
+	}
+
+	public void updateWindowFailure() {
+		filter.setText("Nie udalo sie odgadnac aktora! :(");
+		hideButtons();
 	};
+
+	private void hideButtons() {
+		this.yesBtn.setVisible(false);
+		this.noBtn.setVisible(false);
+		this.dontKnowBtn.setVisible(false);
+	}
 }

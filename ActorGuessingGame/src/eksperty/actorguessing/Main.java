@@ -67,13 +67,13 @@ public class Main {
 			System.out.println("\t" + actor.getFriendlyName());
 			i++;
 		}
-		i = 1;
-		for(Actor actor : engine.callQuery(QuestionTypes.ROLE_PLAYED, "Dobra Postac",true)){
-			System.out.println("3");
-			System.out.println("Solution " + i + ":");
-			System.out.println("\t" + actor.getFriendlyName());
-			i++;
-		}
+//		i = 1;
+//		for(Actor actor : engine.callQuery(QuestionTypes.ROLE_PLAYED, "Dobra Postac",true)){
+//			System.out.println("3");
+//			System.out.println("Solution " + i + ":");
+//			System.out.println("\t" + actor.getFriendlyName());
+//			i++;
+//		}
 		i = 1;
 		for(Actor actor : engine.callQuery(QuestionTypes.SERIES_MOVIE_PLAYED_IN_FROM, "Hannibal Series",true)){
 			System.out.println("4");
