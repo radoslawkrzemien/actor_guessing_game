@@ -3,8 +3,11 @@ package eksperty.actorguessing.engine;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -34,14 +37,16 @@ public class Engine {
 	private Set<Sex> sexes = new HashSet<>();
 	private Set<Feature> features = new HashSet<>();
 	private Set<Fact> knownFacts = new HashSet<>();
+	private Set<Question> questionsBase = new HashSet<>();
+	private Mapper mapper;
 	
 	public Engine (String basefile){
 		this.basefile = basefile;
 	}
 
-	public boolean initialize() {
+	public Mapper initialize() {
 		if(!this.consult()){
-			return false;
+			return null;
 		}
 		return this.parseBasefile();
 	}
@@ -52,102 +57,87 @@ public class Engine {
 		Set<Actor> result = new HashSet<Actor>();
 		switch(type){
 			case MOVIE_PLAYED_IN:
-				String prologMovieName = getMoviePrologName(argument);
+				String prologMovieName = this.mapper.getMoviePrologName(argument);
 				q = new Query("gral_w", new Term[] {v, new Atom(prologMovieName)});
 				Map<String,Term>[] solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
 				break;
-//			case ROLE_PLAYED:
-//				String prologRoleName = getRolePrologName(argument);
-//				Variable m = new Variable("M");
-//				q = new Query("gral_postac", new Term[] {v, m, new Atom(prologRoleName)});
-//				solutions = q.allSolutions();
-//				for(Map<String,Term> solution : solutions){
-//					for(String s : solution.keySet()){
-//						if(s.equals("A")){
-//							String actorPrologName = solution.get(s).toString();
-//							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
-//							result.add(actor);
-//						}
-//					}
-//				}
-//				break;
 			case DIRECTOR_OF_MOVIE_PLAYED_IN:
-				String prologDirectorName = getDirectorPrologName(argument);
+				String prologDirectorName = this.mapper.getDirectorPrologName(argument);
 				q = new Query("gral_w(A,F),rezyserowal(" + prologDirectorName + ",F).");
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						if(s.equals("A")){
 							String actorPrologName = solution.get(s).toString();
-							Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+							Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 							result.add(actor);
 						}
 					}
 				}
 				break;
 			case SERIES_MOVIE_PLAYED_IN_FROM:
-				String prologSeriesName = getSeriesPrologName(argument);
+				String prologSeriesName = this.mapper.getSeriesPrologName(argument);
 				q = new Query("gral_w_serii", new Term[] {v, new Atom(prologSeriesName)});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
 				break;
 			case SEX:
-				String prologSexName = getSexPrologName(argument);
+				String prologSexName = this.mapper.getSexPrologName(argument);
 				q = new Query("plec", new Term[] {v, new Atom(prologSexName)});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
 				break;
 			case FEATURES:
-				String prologFeatureName = getFeaturePrologName(argument);
+				String prologFeatureName = this.mapper.getFeaturePrologName(argument);
 				q = new Query("cechy_szczegolne", new Term[] {v, new Atom(prologFeatureName)});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
 				break;
 			case PERSON_OFTEN_WORKS_WITH:
-				String prologPersonName = getPersonPrologName(argument);
+				String prologPersonName = this.mapper.getPersonPrologName(argument);
 				q = new Query("czesto_pracuje_z", new Term[] {new Atom(prologPersonName), v});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
 				break;
 			case ROLE_OFTEN_PLAYS:
-				String prologRoleName = getRolePrologName(argument);
+				String prologRoleName = this.mapper.getRolePrologName(argument);
 				q = new Query("czesto_gra", new Term[] {v, new Atom(prologRoleName)});
 				solutions = q.allSolutions();
 				for(Map<String,Term> solution : solutions){
 					for(String s : solution.keySet()){
 						String actorPrologName = solution.get(s).toString();
-						Actor actor = new Actor(actorPrologName,getActorFriendlyName(actorPrologName));
+						Actor actor = new Actor(actorPrologName,this.mapper.getActorFriendlyName(actorPrologName));
 						result.add(actor);
 					}
 				}
@@ -166,29 +156,9 @@ public class Engine {
 		return result;
 	}
 	
-	public void addKnownFact(QuestionTypes type, String entityFriendlyName, boolean authenticity){
-		Fact f = new Fact(type,new Entity(getEntityPrologName(entityFriendlyName),entityFriendlyName),authenticity);
+	public void addKnownFact(QuestionTypes type, Entity entity, boolean authenticity){
+		Fact f = new Fact(type,entity,authenticity);
 		this.knownFacts.add(f);
-	}
-
-	private String getEntityPrologName(String argument) {
-		String result = getPersonPrologName(argument);
-		if(result == null){
-			result = getRolePrologName(argument);
-		}
-		if(result == null){
-			result = getFeaturePrologName(argument);
-		}
-		if(result == null){
-			result = getMoviePrologName(argument);
-		}
-		if(result == null){
-			result = getSeriesPrologName(argument);
-		}
-		if(result == null){
-			result = getSexPrologName(argument);
-		}
-		return result;
 	}
 
 	private boolean consult() {
@@ -203,7 +173,7 @@ public class Engine {
 		}
 	}
 
-	private boolean parseBasefile() {
+	private Mapper parseBasefile() {
 		try(BufferedReader br = new BufferedReader(new FileReader(this.basefile))) {
 		    for(String line; (line = br.readLine()) != null; ) {
 		        if(line.startsWith("%") || line.length() == 0){
@@ -215,22 +185,22 @@ public class Engine {
 		        String factName = line.substring(0,line.indexOf("("));
 		        switch(factName){
 		        	case "gral_w":
-		        		parseActorPlayedInMovie(line);
+		        		Parser.parseActorPlayedInMovie(line,this.actors,this.movies);
 		        		break;
 		        	case "gral_postac":
-		        		parseActorPlayedRole(line);
+		        		Parser.parseActorPlayedRole(line, this.actors, this.movies, this.roles);
 		        		break;
 		        	case "rezyserowal":
-						parseDirectors(line);
+		        		Parser.parseDirectors(line, this.directors, this.movies);
 		        		break;
 		        	case "film_z_serii":
-						parseSeries(line);
+		        		Parser.parseSeries(line, this.series, this.movies);
 		        		break;
 		        	case "plec":
-						parseSex(line);
+		        		Parser.parseSex(line, this.actors, this.sexes);
 		        		break;
 		        	case "cechy_szczegolne":
-						parseFeatures(line);
+		        		Parser.parseFeatures(line, this.actors, this.features);
 		        		break;
 		        }
 		    }
@@ -238,352 +208,65 @@ public class Engine {
 			System.out.println("ERROR DURING PARSING FILE!");
 			System.exit(-1);
 		}
-		return true;
+		createQuestionBase();
+		Mapper mapper = createMapper();
+		this.mapper = mapper;
+		return mapper;
 	}
 
-	private void parseFeatures(String line) {
-		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		String featureName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		String actorFriendlyName = "";
-		for(String s : actorName.split("_")){
-			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		actorFriendlyName = actorFriendlyName.trim();
-		String featureFriendlyName = "";
-		for(String s : featureName.split("_")){
-			featureFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		featureFriendlyName = featureFriendlyName.trim();
-		Actor actor = new Actor(actorName,actorFriendlyName);
-		Feature feature = new Feature(featureName,featureFriendlyName);
-		this.actors.add(actor);
-		this.features.add(feature);
+	private Mapper createMapper() {
+		Mapper mapper = new Mapper(this.actors, this.directors, this.movies, this.features, this.sexes, this.series, this.roles);
+		return mapper;
 	}
 
-	private void parseSex(String line) {
-		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		String sexName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		String actorFriendlyName = "";
-		for(String s : actorName.split("_")){
-			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		actorFriendlyName = actorFriendlyName.trim();
-		String sexFriendlyName = "";
-		for(String s : sexName.split("_")){
-			sexFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		sexFriendlyName = sexFriendlyName.trim();
-		Actor actor = new Actor(actorName,actorFriendlyName);
-		Sex sex = new Sex(sexName,sexFriendlyName);
-		this.actors.add(actor);
-		this.sexes.add(sex);
-	}
-
-	private void parseSeries(String line) {
-		String movieName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		String seriesName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		String movieFriendlyName = "";
-		for(String s : movieName.split("_")){
-			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		movieFriendlyName = movieFriendlyName.trim();
-		String seriesFriendlyName = "";
-		for(String s : seriesName.split("_")){
-			seriesFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		seriesFriendlyName = seriesFriendlyName.trim();
-		Movie movie = new Movie(movieName,movieFriendlyName);
-		Series series = new Series(seriesName,seriesFriendlyName);
-		this.series.add(series);
-		this.movies.add(movie);
-	}
-
-	private void parseDirectors(String line) {
-		String directorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		String movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		String directorFriendlyName = "";
-		for(String s : directorName.split("_")){
-			directorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		directorFriendlyName = directorFriendlyName.trim();
-		String movieFriendlyName = "";
-		for(String s : movieName.split("_")){
-			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		movieFriendlyName = movieFriendlyName.trim();
-		Director director = new Director(directorName,directorFriendlyName);
-		Movie movie = new Movie(movieName,movieFriendlyName);
-		this.directors.add(director);
-		this.movies.add(movie);
-	}
-
-	private void parseActorPlayedRole(String line) {
-		int firstCommaIndex = line.indexOf(",");
-		String actorName = line.substring(line.indexOf("(") + 1, firstCommaIndex);
-		String movieName = line.substring(firstCommaIndex + 1, line.indexOf(",",firstCommaIndex + 1));
-		String roleName = line.substring(line.indexOf(",",firstCommaIndex + 1) + 1, line.indexOf(")"));
-		String actorFriendlyName = "";
-		for(String s : actorName.split("_")){
-			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		actorFriendlyName = actorFriendlyName.trim();
-		String movieFriendlyName = "";
-		for(String s : movieName.split("_")){
-			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		movieFriendlyName = movieFriendlyName.trim();
-		String roleFriendlyName = "";
-		for(String s : roleName.split("_")){
-			roleFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		roleFriendlyName = roleFriendlyName.trim();
-		Actor actor = new Actor(actorName,actorFriendlyName);
-		Movie movie = new Movie(movieName,movieFriendlyName);
-		Role role = new Role(roleName,roleFriendlyName);
-		this.actors.add(actor);
-		this.movies.add(movie);
-		this.roles.add(role);
-	}
-
-	private void parseActorPlayedInMovie(String line) {
-		String actorName = line.substring(line.indexOf("(") + 1, line.indexOf(","));
-		String movieName = line.substring(line.indexOf(",") + 1, line.indexOf(")"));
-		String actorFriendlyName = "";
-		for(String s : actorName.split("_")){
-			actorFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		actorFriendlyName = actorFriendlyName.trim();
-		String movieFriendlyName = "";
-		for(String s : movieName.split("_")){
-			movieFriendlyName += Character.toUpperCase(s.charAt(0)) + s.substring(1) + " ";
-		}
-		movieFriendlyName = movieFriendlyName.trim();
-		Actor actor = new Actor(actorName,actorFriendlyName);
-		Movie movie = new Movie(movieName,movieFriendlyName);
-		this.actors.add(actor);
-		this.movies.add(movie);
-	}
-	
-	public String getActorPrologName(String friendlyName){
-		String result = null;
+	private void createQuestionBase() {
 		for(Actor a : this.actors){
-			if(a.getFriendlyName().equals(friendlyName)){
-				result = a.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.PERSON_OFTEN_WORKS_WITH, a));
 		}
-		return result;
-	}
-	
-	public String getActorFriendlyName(String prologName){
-		String result = null;
-		for(Actor a : this.actors){
-			if(a.getPrologName().equals(prologName)){
-				result = a.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getDirectorPrologName(String friendlyName){
-		String result = null;
 		for(Director d : this.directors){
-			if(d.getFriendlyName().equals(friendlyName)){
-				result = d.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.DIRECTOR_OF_MOVIE_PLAYED_IN, d));
 		}
-		return result;
-	}
-	
-	public String getDirectorFriendlyName(String prologName){
-		String result = null;
-		for(Director d : this.directors){
-			if(d.getPrologName().equals(prologName)){
-				result = d.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getFeaturePrologName(String friendlyName){
-		String result = null;
-		for(Feature f : this.features){
-			if(f.getFriendlyName().equals(friendlyName)){
-				result = f.getPrologName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getFeatureFriendlyName(String prologName){
-		String result = null;
-		for(Feature f : this.features){
-			if(f.getPrologName().equals(prologName)){
-				result = f.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getMoviePrologName(String friendlyName){
-		String result = null;
 		for(Movie m : this.movies){
-			if(m.getFriendlyName().equals(friendlyName)){
-				result = m.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.MOVIE_PLAYED_IN, m));
 		}
-		return result;
-	}
-	
-	public String getMovieFriendlyName(String prologName){
-		String result = null;
-		for(Movie m : this.movies){
-			if(m.getPrologName().equals(prologName)){
-				result = m.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getRolePrologName(String friendlyName){
-		String result = null;
 		for(Role r : this.roles){
-			if(r.getFriendlyName().equals(friendlyName)){
-				result = r.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.ROLE_OFTEN_PLAYS,r));
 		}
-		return result;
-	}
-	
-	public String getRoleFriendlyName(String prologName){
-		String result = null;
-		for(Role r : this.roles){
-			if(r.getPrologName().equals(prologName)){
-				result = r.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getSeriesPrologName(String friendlyName){
-		String result = null;
 		for(Series s : this.series){
-			if(s.getFriendlyName().equals(friendlyName)){
-				result = s.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.SERIES_MOVIE_PLAYED_IN_FROM, s));
 		}
-		return result;
-	}
-	
-	public String getSeriesFriendlyName(String prologName){
-		String result = null;
-		for(Series s : this.series){
-			if(s.getPrologName().equals(prologName)){
-				result = s.getFriendlyName();
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getSexPrologName(String friendlyName){
-		String result = null;
 		for(Sex s : this.sexes){
-			if(s.getFriendlyName().equals(friendlyName)){
-				result = s.getPrologName();
-				break;
-			}
+			this.questionsBase.add(new Question(QuestionTypes.SEX, s));
 		}
-		return result;
-	}
-	
-	public String getSexFriendlyName(String prologName){
-		String result = null;
-		for(Sex s : this.sexes){
-			if(s.getPrologName().equals(prologName)){
-				result = s.getFriendlyName();
-				break;
-			}
+		for(Feature f : this.features){
+			this.questionsBase.add(new Question(QuestionTypes.FEATURES, f));
 		}
-		return result;
 	}
 
-	private String getPersonPrologName(String argument) {
-		String result = null;
-		if((result = getActorPrologName(argument)) == null){
-			result = getDirectorPrologName(argument);
-		}
-		return result;
-	}
-
-	private String getPersonFriendlyName(String argument) {
-		String result = null;
-		if((result = getActorFriendlyName(argument)) == null){
-			result = getDirectorFriendlyName(argument);
-		}
-		return result;
-	}
-
-	
-	public Map<QuestionTypes, String> getNextQuestion() {
-		Map<QuestionTypes, String> result = new HashMap<>();
+	public Question getNextQuestion() {
+		Question result = null;
 		Set<Actor> resultSet = getResultSet();
 		if(resultSet.size() > 1){
-			Random rand = new Random();
-			int questionTypesCount = QuestionTypes.values().length;
-			QuestionTypes questionType = QuestionTypes.values()[rand.nextInt(questionTypesCount)];
-			String entity = null;
-			switch(questionType){
-				case MOVIE_PLAYED_IN:
-					int moviesSize = this.movies.size();
-					entity = ((Movie)this.movies.toArray()[rand.nextInt(moviesSize)]).getFriendlyName();
-					break;
-//				case ROLE_PLAYED:
-				case ROLE_OFTEN_PLAYS:
-					int rolesSize = this.roles.size();
-					entity = ((Role)this.roles.toArray()[rand.nextInt(rolesSize)]).getFriendlyName();
-					break;
-				case DIRECTOR_OF_MOVIE_PLAYED_IN:
-					int directorsSize = this.directors.size();
-					entity = ((Director)this.directors.toArray()[rand.nextInt(directorsSize)]).getFriendlyName();
-					break;
-				case SERIES_MOVIE_PLAYED_IN_FROM:
-					int seriesSize = this.series.size();
-					entity = ((Series)this.series.toArray()[rand.nextInt(seriesSize)]).getFriendlyName();
-					break;
-				case SEX:
-					int sexesSize = this.sexes.size();
-					entity = ((Sex)this.sexes.toArray()[rand.nextInt(sexesSize)]).getFriendlyName();
-					break;
-				case FEATURES:
-					int featuresSize = this.features.size();
-					entity = ((Feature)this.features.toArray()[rand.nextInt(featuresSize)]).getFriendlyName();
-					break;
-				case PERSON_OFTEN_WORKS_WITH:
-					int personsSize = this.actors.size() + this.directors.size();
-					int index = rand.nextInt(personsSize);
-					if(index > this.actors.size()){
-						entity = ((Director)this.directors.toArray()[index - this.actors.size()]).getFriendlyName();
-					} else {
-						entity = ((Actor)this.actors.toArray()[index]).getFriendlyName();
-					}
-					break;
-				default:
-					System.err.println("WRONG QUESTION TYPE!");
-					System.exit(-1);
-					break;
+			LinkedList<Question> questions = new LinkedList<Question>(this.questionsBase);
+			Collections.shuffle(questions);
+			result = questions.getFirst();
+			boolean questionOk = false;
+			while(!questionOk){
+				Set<Actor> newResultSet = new HashSet<Actor>(resultSet);
+				newResultSet.retainAll(callQuery(result.getType(), result.getEntity().getFriendlyName(), true));
+				if(newResultSet.size() != resultSet.size()){
+					questionOk = true;
+					continue;
+				}
+				newResultSet.retainAll(callQuery(result.getType(), result.getEntity().getFriendlyName(), false));
+				if(newResultSet.size() != resultSet.size()){
+					questionOk = true;
+					continue;
+				}
+				Collections.shuffle(questions);
+				result = questions.getFirst();
 			}
-			result.put(questionType,entity);
+			this.questionsBase.remove(result);
 		}
 		return result;
 	}

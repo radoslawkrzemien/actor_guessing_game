@@ -8,6 +8,7 @@ import javax.swing.UIManager;
 import org.jpl7.Term;
 
 import eksperty.actorguessing.engine.Engine;
+import eksperty.actorguessing.engine.Mapper;
 import eksperty.actorguessing.engine.QuestionTypes;
 import eksperty.actorguessing.engine.entities.Actor;
 import eksperty.actorguessing.gui.GUI;
@@ -17,7 +18,8 @@ public class Main {
 	
 	public static void main(String args[]){
 		final Engine engine = new Engine("baza.pl");
-		if(!engine.initialize()){
+		final Mapper mapper = engine.initialize();
+		if(mapper == null){
 			System.err.println("INITIALIZATION FAILED!");
 			System.exit(-1);
 		}
@@ -30,7 +32,7 @@ public class Main {
             public void run() {
                 //Turn off metal's use of bold fonts
         UIManager.put("swing.boldMetal", Boolean.FALSE);
-        Demo.createAndShowGUI(engine);
+        Demo.createAndShowGUI(engine, mapper);
             }
         });
 	}

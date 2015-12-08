@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import eksperty.actorguessing.engine.Engine;
+import eksperty.actorguessing.engine.Mapper;
+import eksperty.actorguessing.engine.Question;
 import eksperty.actorguessing.engine.QuestionTypes;
 import eksperty.actorguessing.engine.entities.Entity;
 
@@ -34,13 +36,15 @@ public class Demo extends JPanel {
 	private JButton dontKnowBtn = new JButton("Nie wiem");
 	private int state = 0;
 	
-	private QuestionTypes currentQuestion = null;
-	private String currentEntity = null;
+	private Question currentQuestion = null;
+//	private String currentEntity = null;
 	private Engine engine = null;
+	private Mapper mapper = null;
 
-	public Demo(Engine engine) {
+	public Demo(Engine engine, Mapper mapper) {
 		super(new GridLayout(1, 1));
 		this.engine = engine;
+		this.mapper = mapper;
 		initializeQuestionMappings();
 		add(makePanel());
 
@@ -88,14 +92,14 @@ public class Demo extends JPanel {
 	 * Create the GUI and show it. For thread safety, this method should be
 	 * invoked from the event dispatch thread.
 	 */
-	public static void createAndShowGUI(Engine engine) {
+	public static void createAndShowGUI(Engine engine, Mapper mapper) {
 		// Create and set up the window.
 		JFrame frame = new JFrame("Actor Guessing Game");
 		frame.setSize(800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// Add content to the window.
-		frame.add(new Demo(engine), BorderLayout.CENTER);
+		frame.add(new Demo(engine, mapper), BorderLayout.CENTER);
 
 		// Display the window.
 		frame.pack();
@@ -103,18 +107,14 @@ public class Demo extends JPanel {
 	}
 
 	private void refreshQuestion() {
-		Map<QuestionTypes,String> nextQuestion = engine.getNextQuestion();
-		if(nextQuestion.isEmpty()){
+		Question nextQuestion = engine.getNextQuestion();
+		if(nextQuestion == null){
 			this.state++;
 			String result = engine.getResult();
 			filter.setText("Czy twoj aktor to " + result);
 		} else {
-			for(QuestionTypes type : nextQuestion.keySet()){
-				currentQuestion = type;
-				currentEntity = nextQuestion.get(type);
-				filter.setText(questionMappings.get(currentQuestion) + " " + currentEntity);
-				break;
-			}
+			this.currentQuestion = nextQuestion;
+			filter.setText(questionMappings.get(currentQuestion.getType()) + " " + currentQuestion.getEntity().getFriendlyName());
 		}
 	}
 	
@@ -132,12 +132,12 @@ public class Demo extends JPanel {
 			String buttonText = ((JButton)e.getSource()).getText();
 			if(buttonText.equals("Tak")){
 				if(state == 0)
-					engine.addKnownFact(currentQuestion, currentEntity, true);
+					engine.addKnownFact(currentQuestion.getType(), currentQuestion.getEntity(), true);
 				else
 					updateWindowSuccess();
 			} else if(buttonText.equals("Nie")){
 				if(state == 0)
-					engine.addKnownFact(currentQuestion, currentEntity, false);
+					engine.addKnownFact(currentQuestion.getType(), currentQuestion.getEntity(), false);
 				else
 					updateWindowFailure();
 			}
